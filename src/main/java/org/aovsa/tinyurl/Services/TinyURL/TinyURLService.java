@@ -1,16 +1,25 @@
 package org.aovsa.tinyurl.Services.TinyURL;
 
 import org.aovsa.tinyurl.Utils.ApiResponse;
-import org.springframework.http.ResponseEntity;
 
-import java.net.MalformedURLException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
+/**
+ * Interface for TinyURL operations.
+ */
 public interface TinyURLService {
 
+    /**
+     * Creates a tiny URL from the given original URL.
+     *
+     * @param originalURL the original URL to be shortened
+     * @return ApiResponse containing the tiny URL and status message
+     */
     ApiResponse<String> createTinyURL(String originalURL);
-    String redirectTinyURL(String tinyURL);
 
+    /**
+     * Redirects the tiny URL to the original URL.
+     *
+     * @param tinyURL the tiny URL to be redirected
+     * @return the original URL
+     */
+    String redirectTinyURL(String tinyURL);
 }
