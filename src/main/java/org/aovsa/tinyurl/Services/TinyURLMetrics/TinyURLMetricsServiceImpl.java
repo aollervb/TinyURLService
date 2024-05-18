@@ -6,7 +6,6 @@ import org.aovsa.tinyurl.Models.MetricsModel;
 import org.aovsa.tinyurl.Repository.MetricsDataRepository;
 import org.aovsa.tinyurl.Repository.MetricsRepository;
 import org.aovsa.tinyurl.Utils.ApiResponse;
-import org.bson.BsonDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
