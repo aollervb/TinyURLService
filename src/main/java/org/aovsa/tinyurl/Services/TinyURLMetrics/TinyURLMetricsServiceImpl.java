@@ -1,5 +1,6 @@
 package org.aovsa.tinyurl.Services.TinyURLMetrics;
 
+import org.aovsa.tinyurl.Exceptions.MetricNotWhitelistedException;
 import org.aovsa.tinyurl.Models.MetricDataModel;
 import org.aovsa.tinyurl.Models.MetricsModel;
 import org.aovsa.tinyurl.Repository.MetricsDataRepository;
@@ -40,12 +41,18 @@ public class TinyURLMetricsServiceImpl implements TinyURLMetricsService{
     @Override
     public void incrementAccessCount(String tinyURL) {
         MetricsModel metricsModel = metricsRepository.findByShortURL(tinyURL);
-        if (metricsModel != null) {
-            metricsModel.setAccessCount(metricsModel.getAccessCount() + 1);
-            metricsRepository.save(metricsModel);
+        try {
+            if (metricsModel != null) {
+                metricsModel.setAccessCount(metricsModel.getAccessCount() + 1);
+                metricsRepository.save(metricsModel);
 
-            MetricDataModel metricDataModel = new MetricDataModel(UUID.randomUUID().toString(), tinyURL, new Date());
-            metricsDataRepository.save(metricDataModel);
+                MetricDataModel metricDataModel = new MetricDataModel(UUID.randomUUID().toString(), tinyURL, new Date());
+                metricsDataRepository.save(metricDataModel);
+            } else {
+                throw new MetricNotWhitelistedException("Metric for " + tinyURL + " not whitelisted");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

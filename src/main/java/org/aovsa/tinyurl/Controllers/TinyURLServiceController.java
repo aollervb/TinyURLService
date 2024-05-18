@@ -1,6 +1,7 @@
 package org.aovsa.tinyurl.Controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.aovsa.tinyurl.Exceptions.TinyURLNotFoundException;
 import org.aovsa.tinyurl.Services.TinyURL.TinyURLService;
 import org.aovsa.tinyurl.Services.TinyURL.TinyURLServiceImpl;
 import org.aovsa.tinyurl.Utils.ApiResponse;
@@ -31,7 +32,12 @@ public class TinyURLServiceController {
     @GetMapping("/{id}")
     public void redirectToOriginalURL(@PathVariable String id, HttpServletResponse response) {
         try {
-            response.sendRedirect(tinyURLService.redirectTinyURL(id));
+            String originalURL = tinyURLService.redirectTinyURL(id);
+            if (originalURL != null && !originalURL.isEmpty()) {
+                response.sendRedirect(originalURL);
+            } else {
+                throw new TinyURLNotFoundException("Tiny URL not found");
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

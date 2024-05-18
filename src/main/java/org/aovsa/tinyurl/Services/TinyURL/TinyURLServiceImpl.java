@@ -51,6 +51,7 @@ public class TinyURLServiceImpl implements TinyURLService {
 
         if (redirectPath != null) {
             tinyURLMetricsService.incrementAccessCount(tinyURL);
+
             return redirectPath.getOriginalURL();
         }
         return "";
