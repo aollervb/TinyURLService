@@ -2,36 +2,39 @@ package org.aovsa.tinyurl.Services.TinyURL;
 
 import org.aovsa.tinyurl.Models.URLPair;
 import org.aovsa.tinyurl.Repository.URLPairRepository;
+import org.aovsa.tinyurl.Services.TinyURLMetrics.TinyURLMetricsService;
+import org.aovsa.tinyurl.Services.TinyURLMetrics.TinyURLMetricsServiceImpl;
 import org.aovsa.tinyurl.Utils.ApiResponse;
 import org.aovsa.tinyurl.Utils.Constants;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 @Service
 public class TinyURLServiceImpl implements TinyURLService {
 
     private final URLPairRepository urlPairRepository;
+    private final TinyURLMetricsService tinyURLMetricsService;
 
-    public TinyURLServiceImpl(URLPairRepository urlPairRepository) {
+    public TinyURLServiceImpl(URLPairRepository urlPairRepository, TinyURLMetricsServiceImpl tinyURLMetricsServiceImpl) {
         this.urlPairRepository = urlPairRepository;
+        this.tinyURLMetricsService = tinyURLMetricsServiceImpl;
     }
 
     @Override
     public ApiResponse<String> createTinyURL(String originalURL) {
-        String shortURL = generateHash(originalURL);
+        String shortURL = generateUUID();
 
         try {
             URLPair newURLPair = new URLPair(shortURL, originalURL);
             URLPair existingURLPair = urlPairRepository.findByShortURL(shortURL);
 
-            if ( existingURLPair != null) {
+            if (existingURLPair != null) {
                 return new ApiResponse<>(existingURLPair.getOriginalURL(), "Tiny URL already exists", HttpStatus.CONFLICT);
             } else {
                 urlPairRepository.save(newURLPair);
+                tinyURLMetricsService.whitelistMetric(newURLPair.getShortURL());
             }
 
         } catch (Exception e) {
@@ -47,25 +50,16 @@ public class TinyURLServiceImpl implements TinyURLService {
         URLPair redirectPath = urlPairRepository.findByShortURL(tinyURL);
 
         if (redirectPath != null) {
+            tinyURLMetricsService.incrementAccessCount(tinyURL);
             return redirectPath.getOriginalURL();
         }
         return "";
 
     }
 
-    private String generateHash(String originalURL) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedhash = digest.digest(originalURL.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hexString = new StringBuilder(2 * encodedhash.length);
-            for (byte b : encodedhash) {
-                String hex = Integer.toHexString(0xff & b);
-                if (hex.length() == 1) hexString.append('0');
-                hexString.append(hex);
-            }
-            return hexString.substring(0, 10); // take first 10 characters as tiny URL
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    private String generateUUID() {
+        return UUID.randomUUID().toString()
+                .replace("-", "")
+                .substring(0,10);
     }
 }
