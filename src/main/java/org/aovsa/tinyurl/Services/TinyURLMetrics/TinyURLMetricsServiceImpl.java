@@ -25,16 +25,12 @@ public class TinyURLMetricsServiceImpl implements TinyURLMetricsService{
     }
 
     @Override
-    public ApiResponse<Map<String, Object>> getAccessCount(String tinyURL, long startDate, long endDate) {
-
-        List<MetricDataModel> metricsData = metricsDataRepository.findAllByShortURL(tinyURL);
-        MetricsModel metricsModel = metricsRepository.findByShortURL(tinyURL);
-
-        if (metricsModel != null) {
-            return new ApiResponse<>(Map.of("accessCount", metricsModel.getAccessCount(), "metricsData", metricsData), "Access count retrieved successfully", HttpStatus.OK);
+    public ApiResponse<List<MetricDataModel>> getAccessCount(String tinyURL, Date startDate, Date endDate) {
+        List<MetricDataModel> metricDataModel = aggregateMetricsInTimeRange(startDate, endDate, 1, tinyURL);
+        if (metricDataModel == null) {
+            return new ApiResponse<>(null, "No access metrics found", HttpStatus.NOT_FOUND);
         }
-
-        return null;
+        return new ApiResponse<List<MetricDataModel>>(metricDataModel, "Metrics retrieved successfully", HttpStatus.OK);
     }
 
     @Override
@@ -57,10 +53,13 @@ public class TinyURLMetricsServiceImpl implements TinyURLMetricsService{
 
     @Override
     public ApiResponse<Map<String, String>> whitelistMetric(String tinyURL) {
-
         MetricsModel metricsModel = new MetricsModel(tinyURL, 0);
         metricsRepository.save(metricsModel);
-
         return new ApiResponse<>(Map.of("metricName", tinyURL, "status", "Metric whitelisted successfully"), "Metric whitelisted successfully", HttpStatus.OK);
+    }
+
+
+    private List<MetricDataModel> aggregateMetricsInTimeRange(Date startDate, Date endDate, long interval, String shortURL) {
+        return metricsDataRepository.findAllByShortURLAndDate(shortURL, startDate, endDate);
     }
 }
