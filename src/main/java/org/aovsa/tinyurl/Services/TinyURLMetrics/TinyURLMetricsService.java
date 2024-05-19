@@ -1,5 +1,6 @@
 package org.aovsa.tinyurl.Services.TinyURLMetrics;
 
+import org.aovsa.tinyurl.Models.AggregatedMetricModel;
 import org.aovsa.tinyurl.Models.MetricDataModel;
 import org.aovsa.tinyurl.Utils.ApiResponse;
 
@@ -15,7 +16,7 @@ public interface TinyURLMetricsService {
      * @param tinyURL the tiny URL to be checked
      * @return the number of times the tiny URL has been accessed
      */
-    ApiResponse<List<MetricDataModel>> getAccessCount(String tinyURL , Date startDate, Date endDate);
+    ApiResponse<List<AggregatedMetricModel>> getAccessCount(String tinyURL , Date startDate, Date endDate, long interval);
 
     /**
      * Increments the access count of the tiny URL by 1.
