@@ -38,6 +38,10 @@ public class TinyURLMetricsServiceImpl implements TinyURLMetricsService{
 
     @Override
     public void incrementAccessCount(String tinyURL) {
+        addCount(tinyURL);
+    }
+
+    private void addCount(String tinyURL) {
         MetricsModel metricsModel = metricsRepository.findByShortURL(tinyURL);
         try {
             if (metricsModel != null) {
@@ -61,7 +65,6 @@ public class TinyURLMetricsServiceImpl implements TinyURLMetricsService{
         return new ApiResponse<>(Map.of("metricName", tinyURL, "status", "Metric whitelisted successfully"), "Metric whitelisted successfully", HttpStatus.OK);
     }
 
-
     private List<AggregatedMetricModel> aggregateMetricsInTimeRange(Date startDate, Date endDate, long interval, String shortURL) {
         List<MetricDataModel> metrics = metricsDataRepository.findAllByShortURLAndDate(shortURL, startDate, endDate);
         return getAggregatedMetricModels(startDate, endDate, interval, metrics);
@@ -71,20 +74,25 @@ public class TinyURLMetricsServiceImpl implements TinyURLMetricsService{
         List<AggregatedMetricModel> aggregatedMetricModels = new ArrayList<>();
         Date newEndDate = new Date(startDate.getTime());
         Date newStartDate = new Date(startDate.getTime());
+
         while (newEndDate.before(endDate)) {
             newEndDate.setTime(newStartDate.getTime() + TimeUnit.MINUTES.toMillis(interval));
             AggregatedMetricModel aggregatedMetricModel = new AggregatedMetricModel();
+
             for (MetricDataModel metric : metrics) {
                 if (newEndDate.after(metric.getAccessTime()) && newStartDate.before(metric.getAccessTime())) {
                     aggregatedMetricModel.setAccessCount(aggregatedMetricModel.getAccessCount() + 1);
-                    aggregatedMetricModel.setGraphTime(new Date(newStartDate.getTime()));
+                    aggregatedMetricModel.setGraphTime(new Date(newEndDate.getTime()));
                 }
             }
+
             if (aggregatedMetricModel.getAccessCount() > 0) {
                 aggregatedMetricModels.add(aggregatedMetricModel);
             }
+
             newStartDate.setTime(newEndDate.getTime());
         }
+
         return aggregatedMetricModels;
     }
 }
