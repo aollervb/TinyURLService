@@ -14,6 +14,8 @@ This is a weekend project created to test my development skills, also it serves 
    a. Metrics aggregated in time intervals.
 
 3. Add capability for retrieving metrics between a specific timeframe or after/before a specific time/date. [✅]
-4. Add a basic frontend UI for creating the tinyURL.
-5. Add basic frontend for User creation to track your created tinyURLs.
-6. Add metrics dashboard for seeing performance of your created tinyURLs.
+4. Add user authentication [✅]
+5. Refactor to use custom Responses/Requests and use ResponseEntity instead of ApiResponse
+6. Add a basic frontend UI for creating the tinyURL.
+7. Add basic frontend for User creation to track your created tinyURLs.
+8. Add metrics dashboard for seeing performance of your created tinyURLs.
