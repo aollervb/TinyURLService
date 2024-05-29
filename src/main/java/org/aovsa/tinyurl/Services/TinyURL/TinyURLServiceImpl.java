@@ -34,7 +34,6 @@ public class TinyURLServiceImpl implements TinyURLService {
         try {
             assert request.getOriginalUrl() != null;
             URLPair urlPair = createTinyURLImpl(request.getOriginalUrl());
-            urlPairRepository.save(urlPair);
             return ResponseEntity.ok(new CreateResponse(urlPair));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CreateResponse(null));
