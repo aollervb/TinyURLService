@@ -4,11 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.aovsa.tinyurl.Models.URLPair;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
-    private String token;
+@AllArgsConstructor
+public class CreateResponse {
+    private URLPair urlPair;
 }

@@ -2,19 +2,19 @@ package org.aovsa.tinyurl.Controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.aovsa.tinyurl.Exceptions.TinyURLNotFoundException;
-import org.aovsa.tinyurl.Models.URLPair;
+import org.aovsa.tinyurl.Requests.BatchCreateRequest;
+import org.aovsa.tinyurl.Requests.CreateRequest;
+import org.aovsa.tinyurl.Responses.BatchCreateResponse;
+import org.aovsa.tinyurl.Responses.CreateResponse;
 import org.aovsa.tinyurl.Services.TinyURL.TinyURLService;
 import org.aovsa.tinyurl.Services.TinyURL.TinyURLServiceImpl;
-import org.aovsa.tinyurl.Utils.ApiResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("")
@@ -26,14 +26,14 @@ public class TinyURLServiceController {
         this.tinyURLService = tinyURLService;
     }
 
-    @PostMapping("/")
-    public ApiResponse<String> createTinyURL(@RequestBody Map<String, String> originalURL) {
-        return tinyURLService.createTinyURL(originalURL.get("originalURL"));
+    @PostMapping("/create")
+    public ResponseEntity<CreateResponse> createTinyURL(@RequestBody CreateRequest request) {
+        return tinyURLService.createTinyURL(request);
     }
 
     @PostMapping("/batch/")
-    public ApiResponse<List<URLPair>> createBatchTinyURL(@RequestBody Map<String, List<String>> batchOriginalURLs) {
-        return tinyURLService.createBatchTinyURL(batchOriginalURLs.get("originalURLs"));
+    public ResponseEntity<BatchCreateResponse> createBatchTinyURL(@RequestBody BatchCreateRequest request) {
+        return tinyURLService.createBatchTinyURL(request);
     }
 
     @GetMapping("/{id}")

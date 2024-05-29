@@ -2,6 +2,10 @@ package org.aovsa.tinyurl.Services.TinyURL;
 
 import org.aovsa.tinyurl.Models.URLPair;
 import org.aovsa.tinyurl.Repository.URLPairRepository;
+import org.aovsa.tinyurl.Requests.BatchCreateRequest;
+import org.aovsa.tinyurl.Requests.CreateRequest;
+import org.aovsa.tinyurl.Responses.BatchCreateResponse;
+import org.aovsa.tinyurl.Responses.CreateResponse;
 import org.aovsa.tinyurl.Services.TinyURLMetrics.TinyURLMetricsServiceImpl;
 import org.aovsa.tinyurl.Utils.ApiResponse;
 import org.junit.jupiter.api.Test;
@@ -10,9 +14,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -36,11 +42,12 @@ public class TinyURLServiceImplTests {
         URLPair urlPair = new URLPair("1234567890", originalURL);
         when(urlPairRepository.save(any(URLPair.class))).thenReturn(urlPair);
 
-        ApiResponse<String> response = tinyURLServiceImpl.createTinyURL(originalURL);
+        CreateRequest request = new CreateRequest();
+        request.setOriginalUrl(originalURL);
 
-        assertEquals(HttpStatus.CREATED, response.getStatus());
-        assertEquals("Tiny URL created successfully", response.getMessage());
-        assertNotNull(response.getData());
+        ResponseEntity<CreateResponse> response = tinyURLServiceImpl.createTinyURL(request);
+
+        assertNotNull(Objects.requireNonNull(response.getBody()).getUrlPair());
 
         verify(urlPairRepository, times(1)).save(any(URLPair.class));
         verify(tinyURLMetricsServiceImpl, times(1)).whitelistMetric(anyString());
@@ -53,11 +60,12 @@ public class TinyURLServiceImplTests {
         URLPair urlPair2 = new URLPair("0987654321", originalURLs.get(1));
         when(urlPairRepository.save(any(URLPair.class))).thenReturn(urlPair1, urlPair2);
 
-        ApiResponse<List<URLPair>> response = tinyURLServiceImpl.createBatchTinyURL(originalURLs);
+        BatchCreateRequest request = new BatchCreateRequest();
+        request.setOriginalUrls(originalURLs);
 
-        assertEquals(HttpStatus.CREATED, response.getStatus());
-        assertEquals("Tiny URLs created successfully", response.getMessage());
-        assertEquals(2, response.getData().size());
+        ResponseEntity<BatchCreateResponse> response = tinyURLServiceImpl.createBatchTinyURL(request);
+
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getUrlPairList().size());
 
         verify(urlPairRepository, times(2)).save(any(URLPair.class));
         verify(tinyURLMetricsServiceImpl, times(2)).whitelistMetric(anyString());

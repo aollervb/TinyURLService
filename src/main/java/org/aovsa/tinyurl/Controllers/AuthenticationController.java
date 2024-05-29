@@ -5,8 +5,6 @@ import org.aovsa.tinyurl.Requests.AuthenticationRequest;
 import org.aovsa.tinyurl.Requests.RegisterRequest;
 import org.aovsa.tinyurl.Responses.AuthenticationResponse;
 import org.aovsa.tinyurl.Services.Authentication.AuthenticationService;
-import org.aovsa.tinyurl.Utils.ApiResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -2,7 +2,10 @@ package org.aovsa.tinyurl.Services.TinyURLMetrics;
 
 import org.aovsa.tinyurl.Models.AggregatedMetricModel;
 import org.aovsa.tinyurl.Models.MetricDataModel;
+import org.aovsa.tinyurl.Requests.MetricsRequest;
+import org.aovsa.tinyurl.Responses.MetricsResponse;
 import org.aovsa.tinyurl.Utils.ApiResponse;
+import org.springframework.http.ResponseEntity;
 
 import java.util.Date;
 import java.util.List;
@@ -13,10 +16,10 @@ public interface TinyURLMetricsService {
     /**
      * Returns the number of times the tiny URL has been accessed.
      *
-     * @param tinyURL the tiny URL to be checked
+     * @param metricsRequest Request containing, startDate, endDate, granularity and tinyURL
      * @return the number of times the tiny URL has been accessed
      */
-    ApiResponse<List<AggregatedMetricModel>> getAccessCount(String tinyURL , Date startDate, Date endDate, long interval);
+    ResponseEntity<MetricsResponse> getAccessCount(MetricsRequest metricsRequest);
 
     /**
      * Increments the access count of the tiny URL by 1.

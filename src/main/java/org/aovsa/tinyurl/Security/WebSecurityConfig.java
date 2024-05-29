@@ -23,11 +23,15 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        //noinspection CodeBlock2Expr
         http
                 .csrf(CsrfConfigurer::disable)
                 .authorizeHttpRequests(reqConfigurer -> {
                             reqConfigurer
-                                    .requestMatchers("/api/v1/auth/authenticate", "/api/v1/auth/register").permitAll()
+                                    .requestMatchers("/api/v1/auth/authenticate",
+                                            "/api/v1/auth/register",
+                                            "/{id}",
+                                            "/create").permitAll()
                                     .anyRequest().authenticated();
                         }
                 )

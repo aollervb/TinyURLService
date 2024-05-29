@@ -6,10 +6,16 @@ import org.aovsa.tinyurl.Models.MetricDataModel;
 import org.aovsa.tinyurl.Models.MetricsModel;
 import org.aovsa.tinyurl.Repository.MetricsDataRepository;
 import org.aovsa.tinyurl.Repository.MetricsRepository;
+import org.aovsa.tinyurl.Requests.MetricsRequest;
+import org.aovsa.tinyurl.Responses.MetricsResponse;
 import org.aovsa.tinyurl.Utils.ApiResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.DateFormatter;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,12 +34,25 @@ public class TinyURLMetricsServiceImpl implements TinyURLMetricsService{
     }
 
     @Override
-    public ApiResponse<List<AggregatedMetricModel>> getAccessCount(String tinyURL, Date startDate, Date endDate, long interval) {
-        List<AggregatedMetricModel> metricDataModel = aggregateMetricsInTimeRange(startDate, endDate, interval, tinyURL);
-        if (metricDataModel == null) {
-            return new ApiResponse<>(null, "No access metrics found", HttpStatus.NOT_FOUND);
+    public ResponseEntity<MetricsResponse> getAccessCount(MetricsRequest metricsRequest) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        try {
+            MetricsResponse response = new MetricsResponse();
+            Date startDate = formatter.parse(metricsRequest.getStartDate());
+            Date endDate = formatter.parse(metricsRequest.getEndDate());
+            long interval = metricsRequest.getGranularity();
+            String tinyURL = metricsRequest.getTinyURL();
+            List<AggregatedMetricModel> metricDataModel = aggregateMetricsInTimeRange(startDate, endDate, interval, tinyURL);
+
+            if (metricDataModel.equals(new ArrayList<AggregatedMetricModel>())) {
+                return ResponseEntity.badRequest().body(new MetricsResponse());
+            }
+
+            return ResponseEntity.ok(new MetricsResponse(tinyURL, metricDataModel));
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
-        return new ApiResponse<List<AggregatedMetricModel>>(metricDataModel, "Metrics retrieved successfully", HttpStatus.OK);
+
     }
 
     @Override

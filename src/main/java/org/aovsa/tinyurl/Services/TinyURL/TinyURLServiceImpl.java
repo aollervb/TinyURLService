@@ -2,11 +2,16 @@ package org.aovsa.tinyurl.Services.TinyURL;
 
 import org.aovsa.tinyurl.Models.URLPair;
 import org.aovsa.tinyurl.Repository.URLPairRepository;
+import org.aovsa.tinyurl.Requests.BatchCreateRequest;
+import org.aovsa.tinyurl.Requests.CreateRequest;
+import org.aovsa.tinyurl.Responses.BatchCreateResponse;
+import org.aovsa.tinyurl.Responses.CreateResponse;
 import org.aovsa.tinyurl.Services.TinyURLMetrics.TinyURLMetricsService;
 import org.aovsa.tinyurl.Services.TinyURLMetrics.TinyURLMetricsServiceImpl;
 import org.aovsa.tinyurl.Utils.ApiResponse;
 import org.aovsa.tinyurl.Utils.Constants;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,24 +30,25 @@ public class TinyURLServiceImpl implements TinyURLService {
     }
 
     @Override
-    public ApiResponse<String> createTinyURL(String originalURL) {
+    public ResponseEntity<CreateResponse> createTinyURL(CreateRequest request) {
         try {
-            URLPair urlPair = createTinyURLImpl(originalURL);
-            return new ApiResponse<>(Constants.BASE_TINY_URL + urlPair.getShortURL(), "Tiny URL created successfully", HttpStatus.CREATED);
+            assert request.getOriginalUrl() != null;
+            URLPair urlPair = createTinyURLImpl(request.getOriginalUrl());
+            urlPairRepository.save(urlPair);
+            return ResponseEntity.ok(new CreateResponse(urlPair));
         } catch (Exception e) {
-            return new ApiResponse<>(null, "Tiny URL creation failed", HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CreateResponse(null));
         }
     }
 
     @Override
-    public ApiResponse<List<URLPair>> createBatchTinyURL(List<String> batchOriginalURLs) {
+    public ResponseEntity<BatchCreateResponse> createBatchTinyURL(BatchCreateRequest request) {
         List<URLPair> createdURLPairs = new ArrayList<>();
-        for (String originalURL : batchOriginalURLs) {
+        for (String originalURL : request.getOriginalUrls()) {
             URLPair urlPair = createTinyURLImpl(originalURL);
-            urlPair.setShortURL(Constants.BASE_TINY_URL + urlPair.getShortURL());
             createdURLPairs.add(urlPair);
         }
-        return new ApiResponse<>(createdURLPairs, "Tiny URLs created successfully", HttpStatus.CREATED);
+        return ResponseEntity.ok(new BatchCreateResponse(createdURLPairs));
     }
 
     @Override
@@ -69,6 +75,7 @@ public class TinyURLServiceImpl implements TinyURLService {
         URLPair urlPair = createURLPair(originalURL);
         urlPairRepository.save(urlPair);
         tinyURLMetricsService.whitelistMetric(urlPair.getShortURL());
+        urlPair.setShortURL(Constants.BASE_TINY_URL + urlPair.getShortURL());
         return urlPair;
     }
 }
